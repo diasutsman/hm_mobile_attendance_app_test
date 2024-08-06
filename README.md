@@ -1,6 +1,6 @@
 # Attendance Mobile (HashMicro Test)
 
-With this question prompt:
+With this question from the doc:
 ```
 Buat 1 applikasi di flutter, untuk mobile attendance,
 
