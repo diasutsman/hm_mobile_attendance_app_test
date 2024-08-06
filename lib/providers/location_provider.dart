@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class LocationProvider with ChangeNotifier {
   final List<Map<String, dynamic>> _locations = [];
@@ -21,10 +22,6 @@ class LocationProvider with ChangeNotifier {
 
   bool checkIfUnique(String name) {
     return !locationNames.containsKey(name);
-  }
-
-  List<Map<String, dynamic>> getLocations() {
-    return _locations;
   }
 
   Future<Position> getCurrentLocation() async {
@@ -64,8 +61,25 @@ class LocationProvider with ChangeNotifier {
 
   bool isWithinDistance(double startLatitude, double startLongitude,
       double endLatitude, double endLongitude, double distanceInMeters) {
-    double distance = Geolocator.distanceBetween(
+    double distance = getDistanceBetween(
         startLatitude, startLongitude, endLatitude, endLongitude);
     return distance <= distanceInMeters;
+  }
+
+  double getDistanceBetween(double startLatitude, double startLongitude,
+      double endLatitude, double endLongitude) {
+    return Geolocator.distanceBetween(
+        startLatitude, startLongitude, endLatitude, endLongitude);
+  }
+
+  LatLng getMiddlePointOfPoints(List<LatLng> points) {
+    var latt = 0.0, lon = 0.0;
+    for (var point in points) {
+      latt += point.latitude;
+      lon += point.longitude;
+    }
+    latt /= points.length;
+    lon /= points.length;
+    return LatLng(latt, lon);
   }
 }

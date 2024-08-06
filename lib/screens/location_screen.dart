@@ -30,7 +30,7 @@ class _LocationScreenState extends State<LocationScreen> {
   @override
   Widget build(BuildContext context) {
     final locations =
-        Provider.of<LocationProvider>(context, listen: false).getLocations();
+        Provider.of<LocationProvider>(context, listen: false).locations;
     final markerSet = locations.mapIndexed(
       (index, marker) {
         return Marker(
@@ -191,21 +191,5 @@ class _LocationScreenState extends State<LocationScreen> {
     final location = await Provider.of<LocationProvider>(context, listen: false)
         .getCurrentLocation();
     return LatLng(location.latitude, location.longitude);
-    // final markers =
-
-    //     Provider.of<LocationProvider>(context, listen: false).getLocations();
-
-    // if (markers.isEmpty) {
-
-    // }
-    // var latt = 0.0, lon = 0.0;
-
-    // for (var marker in markers) {
-    //   latt += marker['latitude'] ?? 0;
-    //   lon += marker['longitude'] ?? 0;
-    // }
-    // latt /= markers.length;
-    // lon /= markers.length;
-    // return LatLng(latt, lon);
   }
 }
