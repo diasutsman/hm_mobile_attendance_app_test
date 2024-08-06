@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
@@ -16,6 +17,10 @@ class _LocationScreenState extends State<LocationScreen> {
   final TextEditingController _nameController = TextEditingController();
   LatLng? _pickedLocation;
 
+  final _formKey = GlobalKey<FormState>();
+
+  GoogleMapController? mapController;
+
   void _selectLocation(LatLng location) {
     setState(() {
       _pickedLocation = location;
@@ -24,12 +29,13 @@ class _LocationScreenState extends State<LocationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final markers =
+    final locations =
         Provider.of<LocationProvider>(context, listen: false).getLocations();
-    final markerSet = markers.mapIndexed(
+    final markerSet = locations.mapIndexed(
       (index, marker) {
         return Marker(
-          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+          icon:
+              BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
           infoWindow: InfoWindow(
             title: marker['name'],
           ),
@@ -42,80 +48,164 @@ class _LocationScreenState extends State<LocationScreen> {
       appBar: AppBar(
         title: const Text('Create Location'),
       ),
-      body: Column(
-        children: [
-          TextField(
-            controller: _nameController,
-            decoration: const InputDecoration(labelText: 'Location Name'),
-          ),
-          FutureBuilder(
-              future: getCurrentLocation(),
-              builder: (context, snapshot) {
-                if (snapshot.hasError) return const Text("Google Map Error.");
-                if (!snapshot.hasData) {
-                  return const Text("Getting current location...");
-                }
-                return SizedBox(
-                  height: 300,
-                  width: double.infinity,
-                  child: GoogleMap(
-                    initialCameraPosition: CameraPosition(
-                      target: LatLng(snapshot.data?.latitude as double,
-                          snapshot.data?.longitude as double),
-                      zoom: 16,
+      body: Form(
+        key: _formKey,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              const Text(
+                  "Please select the point you want to choose as the attendance point."),
+              const SizedBox(
+                height: 16,
+              ),
+              FutureBuilder(
+                future: getCurrentLocation(),
+                builder: (context, snapshot) {
+                  Set<Circle> circles = {
+                    Circle(
+                      circleId: const CircleId("currentLoc"),
+                      center: LatLng(snapshot.data?.latitude ?? 0,
+                          snapshot.data?.longitude ?? 0),
+                      radius: 50,
+                      strokeWidth: 4,
+                      strokeColor: Colors.lightBlue.withOpacity(0.75),
                     ),
-                    onTap: _selectLocation,
-                    markers: {
-                      ...markerSet,
-                      ...((_pickedLocation == null
-                          ? {}
-                          : {
-                              Marker(
-                                markerId: const MarkerId('m1'),
-                                position: _pickedLocation!,
+                  };
+                  final Marker currentLocMarker = Marker(
+                    markerId: const MarkerId('user_location'),
+                    position: snapshot.data ?? const LatLng(0.0, 0.0),
+                    infoWindow: const InfoWindow(title: 'Your Location'),
+                    icon: BitmapDescriptor.defaultMarkerWithHue(
+                        BitmapDescriptor.hueBlue),
+                  );
+                  Set<Marker> markers = {
+                    currentLocMarker,
+                    ...markerSet,
+                    ...((_pickedLocation == null
+                        ? {}
+                        : {
+                            Marker(
+                              onDragStart: (value) {
+                                mapController?.showMarkerInfoWindow(
+                                  const MarkerId('m1'),
+                                );
+                              },
+                              infoWindow: InfoWindow(
+                                title:
+                                    "(${_pickedLocation?.latitude ?? 0}, ${_pickedLocation?.longitude ?? 0})",
+                              ),
+                              onDragEnd: (value) {
+                                _selectLocation(value);
+                              },
+                              draggable: true,
+                              markerId: const MarkerId('m1'),
+                              position:
+                                  _pickedLocation ?? const LatLng(0.0, 0.0),
+                            )
+                          })),
+                  };
+                  return SizedBox(
+                    height: 300,
+                    width: double.infinity,
+                    child: snapshot.hasError
+                        ? const Center(child: Text("Google Map Error."))
+                        : !snapshot.hasData
+                            ? const Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    CircularProgressIndicator(),
+                                    SizedBox(
+                                      height: 8,
+                                    ),
+                                    Text("Getting current location..."),
+                                  ],
+                                ),
                               )
-                            })),
-                    },
-                  ),
-                );
-              }),
-          ElevatedButton(
-            child: const Text('Save Location'),
-            onPressed: () {
-              if (_nameController.text.isNotEmpty && _pickedLocation != null) {
-                Provider.of<LocationProvider>(context, listen: false)
-                    .addLocation(
-                  _nameController.text,
-                  _pickedLocation!.latitude,
-                  _pickedLocation!.longitude,
-                );
-                Navigator.of(context).pop();
-              }
-            },
+                            : GoogleMap(
+                                onMapCreated: (mapController) {
+                                  this.mapController = mapController;
+                                },
+                                initialCameraPosition: CameraPosition(
+                                  target: LatLng(
+                                      snapshot.data?.latitude as double,
+                                      snapshot.data?.longitude as double),
+                                  zoom: 16,
+                                ),
+                                onTap: _selectLocation,
+                                markers: markers,
+                                circles: circles,
+                              ),
+                  );
+                },
+              ),
+              TextFormField(
+                controller: _nameController,
+                decoration: const InputDecoration(labelText: 'Location Name'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a location name';
+                  }
+
+                  if (!Provider.of<LocationProvider>(context, listen: false)
+                      .checkIfUnique(value)) {
+                    return 'Location name already exists';
+                  }
+
+                  return null;
+                },
+              ),
+              ElevatedButton(
+                child: const Text('Save Location'),
+                onPressed: () {
+                  if (!_formKey.currentState!.validate()) {
+                    return;
+                  }
+                  if (_pickedLocation == null) {
+                    Fluttertoast.showToast(
+                        msg: "Please choose location on the map.");
+                  }
+                  Provider.of<LocationProvider>(context, listen: false)
+                      .addLocation(
+                    _nameController.text,
+                    _pickedLocation!.latitude,
+                    _pickedLocation!.longitude,
+                  );
+                  Navigator.of(context).pop();
+                  Fluttertoast.showToast(
+                    msg:
+                        "Added \"${_nameController.text}\" at (${_pickedLocation!.latitude}, ${_pickedLocation!.longitude}) on the location list.",
+                  );
+                },
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
 
   Future<LatLng> getCurrentLocation() async {
-    final markers =
-        Provider.of<LocationProvider>(context, listen: false).getLocations();
+    final location = await Provider.of<LocationProvider>(context, listen: false)
+        .getCurrentLocation();
+    return LatLng(location.latitude, location.longitude);
+    // final markers =
 
-    if (markers.isEmpty) {
-      final location =
-          await Provider.of<LocationProvider>(context, listen: false)
-              .getCurrentLocation();
-      return LatLng(location.latitude, location.longitude);
-    }
-    var latt = 0.0, lon = 0.0;
+    //     Provider.of<LocationProvider>(context, listen: false).getLocations();
 
-    for (var marker in markers) {
-      latt += marker['latitude'] ?? 0;
-      lon += marker['longitude'] ?? 0;
-    }
-    latt /= markers.length;
-    lon /= markers.length;
-    return LatLng(latt, lon);
+    // if (markers.isEmpty) {
+
+    // }
+    // var latt = 0.0, lon = 0.0;
+
+    // for (var marker in markers) {
+    //   latt += marker['latitude'] ?? 0;
+    //   lon += marker['longitude'] ?? 0;
+    // }
+    // latt /= markers.length;
+    // lon /= markers.length;
+    // return LatLng(latt, lon);
   }
 }

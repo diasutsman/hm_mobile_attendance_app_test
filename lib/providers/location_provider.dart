@@ -6,13 +6,21 @@ class LocationProvider with ChangeNotifier {
 
   List<Map<String, dynamic>> get locations => _locations;
 
+  Map<String, dynamic> locationNames = {};
+
   void addLocation(String name, double latitude, double longitude) {
+    assert(checkIfUnique(name));
     _locations.add({
       'name': name,
       'latitude': latitude,
       'longitude': longitude,
     });
+    locationNames[name] = true;
     notifyListeners();
+  }
+
+  bool checkIfUnique(String name) {
+    return !locationNames.containsKey(name);
   }
 
   List<Map<String, dynamic>> getLocations() {
