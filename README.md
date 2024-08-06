@@ -23,5 +23,11 @@ Mohon Mengumpulkan Hasil test dalam bentuk APK dan Source Code kemudian dikirim 
 
    visit this link to know the details to get the google map trial api key: https://pub.dev/packages/google_maps_flutter#getting-started
 
+2. Run these commands:
+   ```
+   flutter pub get
+   flutter run
+   ```
+
 ### For IOS
 Because lack of device to test the app, please visit this link to setup the project: https://pub.dev/packages/google_maps_flutter#ios
