@@ -16,6 +16,7 @@ class MyApp extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (context) => LocationProvider(),
       child: MaterialApp(
+        debugShowCheckedModeBanner: false,
         title: 'Mobile Attendance',
         theme: ThemeData(
           primarySwatch: Colors.blue,

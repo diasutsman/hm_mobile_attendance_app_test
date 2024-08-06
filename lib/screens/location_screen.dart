@@ -10,10 +10,10 @@ class LocationScreen extends StatefulWidget {
   const LocationScreen({super.key});
 
   @override
-  _LocationScreenState createState() => _LocationScreenState();
+  LocationScreenState createState() => LocationScreenState();
 }
 
-class _LocationScreenState extends State<LocationScreen> {
+class LocationScreenState extends State<LocationScreen> {
   final TextEditingController _nameController = TextEditingController();
   LatLng? _pickedLocation;
 
@@ -48,139 +48,214 @@ class _LocationScreenState extends State<LocationScreen> {
       appBar: AppBar(
         title: const Text('Create Location'),
       ),
-      body: Form(
-        key: _formKey,
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              const Text(
-                  "Please select the point you want to choose as the attendance point."),
-              const SizedBox(
-                height: 16,
-              ),
-              FutureBuilder(
-                future: getCurrentLocation(),
-                builder: (context, snapshot) {
-                  Set<Circle> circles = {
-                    Circle(
-                      circleId: const CircleId("currentLoc"),
-                      center: LatLng(snapshot.data?.latitude ?? 0,
-                          snapshot.data?.longitude ?? 0),
-                      radius: 50,
-                      strokeWidth: 4,
-                      strokeColor: Colors.lightBlue.withOpacity(0.75),
+      body: SingleChildScrollView(
+        child: Form(
+          key: _formKey,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Text(
+                    "Please select the point you want to choose as the attendance point."),
+                const SizedBox(
+                  height: 16,
+                ),
+                const Text(
+                  "Legends:",
+                  textAlign: TextAlign.left,
+                ),
+                Row(
+                  children: [
+                    Container(
+                      decoration: const BoxDecoration(
+                        color: Colors.green,
+                      ),
+                      width: 16,
+                      height: 16,
                     ),
-                  };
-                  final Marker currentLocMarker = Marker(
-                    markerId: const MarkerId('user_location'),
-                    position: snapshot.data ?? const LatLng(0.0, 0.0),
-                    infoWindow: const InfoWindow(title: 'Your Location'),
-                    icon: BitmapDescriptor.defaultMarkerWithHue(
-                        BitmapDescriptor.hueBlue),
-                  );
-                  Set<Marker> markers = {
-                    currentLocMarker,
-                    ...markerSet,
-                    ...((_pickedLocation == null
-                        ? {}
-                        : {
-                            Marker(
-                              onDragStart: (value) {
-                                mapController?.showMarkerInfoWindow(
-                                  const MarkerId('m1'),
-                                );
-                              },
-                              infoWindow: InfoWindow(
-                                title:
-                                    "(${_pickedLocation?.latitude ?? 0}, ${_pickedLocation?.longitude ?? 0})",
-                              ),
-                              onDragEnd: (value) {
-                                _selectLocation(value);
-                              },
-                              draggable: true,
-                              markerId: const MarkerId('m1'),
-                              position:
-                                  _pickedLocation ?? const LatLng(0.0, 0.0),
-                            )
-                          })),
-                  };
-                  return SizedBox(
-                    height: 300,
-                    width: double.infinity,
-                    child: snapshot.hasError
-                        ? const Center(child: Text("Google Map Error."))
-                        : !snapshot.hasData
-                            ? const Center(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    CircularProgressIndicator(),
-                                    SizedBox(
-                                      height: 8,
-                                    ),
-                                    Text("Getting current location..."),
-                                  ],
-                                ),
-                              )
-                            : GoogleMap(
-                                onMapCreated: (mapController) {
-                                  this.mapController = mapController;
+                    const SizedBox(
+                      width: 8,
+                    ),
+                    const Text(": Points that already been set"),
+                  ],
+                ),
+                Row(
+                  children: [
+                    Container(
+                      decoration: const BoxDecoration(
+                        color: Color.fromARGB(255, 0, 0, 255),
+                      ),
+                      width: 16,
+                      height: 16,
+                    ),
+                    const SizedBox(
+                      width: 8,
+                    ),
+                    const Text(": Your current position"),
+                  ],
+                ),
+                Row(
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.lightBlue.withOpacity(0.75),
+                      ),
+                      width: 16,
+                      height: 16,
+                    ),
+                    const SizedBox(
+                      width: 8,
+                    ),
+                    const Text(": Area within a 50m radius of your position"),
+                  ],
+                ),
+                Row(
+                  children: [
+                    Container(
+                      decoration: const BoxDecoration(
+                        color: Color.fromARGB(255, 255, 0, 0),
+                      ),
+                      width: 16,
+                      height: 16,
+                    ),
+                    const SizedBox(
+                      width: 8,
+                    ),
+                    const Text(": Your selected position."),
+                  ],
+                ),
+                const SizedBox(
+                  height: 16,
+                ),
+                FutureBuilder(
+                  future: getCurrentLocation(),
+                  builder: (context, snapshot) {
+                    Set<Circle> circles = {
+                      Circle(
+                        circleId: const CircleId("currentLoc"),
+                        center: LatLng(snapshot.data?.latitude ?? 0,
+                            snapshot.data?.longitude ?? 0),
+                        radius: 50,
+                        strokeWidth: 4,
+                        strokeColor: Colors.lightBlue.withOpacity(0.75),
+                      ),
+                    };
+                    final Marker currentLocMarker = Marker(
+                      markerId: const MarkerId('user_location'),
+                      position: snapshot.data ?? const LatLng(0.0, 0.0),
+                      infoWindow: const InfoWindow(title: 'Your Location'),
+                      icon: BitmapDescriptor.defaultMarkerWithHue(
+                          BitmapDescriptor.hueBlue),
+                    );
+                    Set<Marker> markers = {
+                      currentLocMarker,
+                      ...markerSet,
+                      ...((_pickedLocation == null
+                          ? {}
+                          : {
+                              Marker(
+                                onDragStart: (value) {
+                                  mapController?.showMarkerInfoWindow(
+                                    const MarkerId('m1'),
+                                  );
                                 },
-                                initialCameraPosition: CameraPosition(
-                                  target: LatLng(
-                                      snapshot.data?.latitude as double,
-                                      snapshot.data?.longitude as double),
-                                  zoom: 16,
+                                infoWindow: InfoWindow(
+                                  title:
+                                      "(${_pickedLocation?.latitude ?? 0}, ${_pickedLocation?.longitude ?? 0})",
                                 ),
-                                onTap: _selectLocation,
-                                markers: markers,
-                                circles: circles,
-                              ),
-                  );
-                },
-              ),
-              TextFormField(
-                controller: _nameController,
-                decoration: const InputDecoration(labelText: 'Location Name'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a location name';
-                  }
+                                onDragEnd: (value) {
+                                  _selectLocation(value);
+                                },
+                                draggable: true,
+                                markerId: const MarkerId('m1'),
+                                position:
+                                    _pickedLocation ?? const LatLng(0.0, 0.0),
+                              )
+                            })),
+                    };
+                    return SizedBox(
+                      height: 300,
+                      width: double.infinity,
+                      child: snapshot.hasError
+                          ? const Center(child: Text("Google Map Error."))
+                          : !snapshot.hasData
+                              ? const Center(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      CircularProgressIndicator(),
+                                      SizedBox(
+                                        height: 8,
+                                      ),
+                                      Text("Getting current location..."),
+                                    ],
+                                  ),
+                                )
+                              : GoogleMap(
+                                  onMapCreated: (mapController) {
+                                    this.mapController = mapController;
+                                  },
+                                  initialCameraPosition: CameraPosition(
+                                    target: LatLng(
+                                        snapshot.data?.latitude as double,
+                                        snapshot.data?.longitude as double),
+                                    zoom: 16,
+                                  ),
+                                  onTap: _selectLocation,
+                                  markers: markers,
+                                  circles: circles,
+                                ),
+                    );
+                  },
+                ),
+                TextFormField(
+                  controller: _nameController,
+                  decoration: const InputDecoration(labelText: 'Location Name'),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter a location name';
+                    }
 
-                  if (!Provider.of<LocationProvider>(context, listen: false)
-                      .checkIfUnique(value)) {
-                    return 'Location name already exists';
-                  }
+                    if (!Provider.of<LocationProvider>(context, listen: false)
+                        .checkIfUnique(value)) {
+                      return 'Location name already exists';
+                    }
 
-                  return null;
-                },
-              ),
-              ElevatedButton(
-                child: const Text('Save Location'),
-                onPressed: () {
-                  if (!_formKey.currentState!.validate()) {
-                    return;
-                  }
-                  if (_pickedLocation == null) {
+                    return null;
+                  },
+                ),
+                const SizedBox(
+                  height: 16,
+                ),
+                ElevatedButton(
+                  child: const Text('Save Location'),
+                  onPressed: () {
+                    if (!_formKey.currentState!.validate()) {
+                      return;
+                    }
+                    if (_pickedLocation == null) {
+                      Fluttertoast.showToast(
+                          msg: "Please choose location on the map.");
+                    }
+                    Provider.of<LocationProvider>(context, listen: false)
+                        .addLocation(
+                      _nameController.text,
+                      _pickedLocation!.latitude,
+                      _pickedLocation!.longitude,
+                    );
+                    Navigator.of(context).pop();
                     Fluttertoast.showToast(
-                        msg: "Please choose location on the map.");
-                  }
-                  Provider.of<LocationProvider>(context, listen: false)
-                      .addLocation(
-                    _nameController.text,
-                    _pickedLocation!.latitude,
-                    _pickedLocation!.longitude,
-                  );
-                  Navigator.of(context).pop();
-                  Fluttertoast.showToast(
-                    msg:
-                        "Added \"${_nameController.text}\" at (${_pickedLocation!.latitude}, ${_pickedLocation!.longitude}) on the location list.",
-                  );
-                },
-              ),
-            ],
+                      msg:
+                          "Added \"${_nameController.text}\" at (${_pickedLocation!.latitude}, ${_pickedLocation!.longitude}) on the location list.",
+                    );
+                  },
+                ),
+              ],
+            ),
           ),
         ),
       ),

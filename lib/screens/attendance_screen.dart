@@ -59,6 +59,76 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  const Text(
+                      "Please select the point you want to create attendance at."),
+                  const SizedBox(
+                    height: 16,
+                  ),
+                  const Text("Legends:"),
+                  Row(
+                    children: [
+                      Container(
+                        decoration: const BoxDecoration(
+                          color: Color.fromARGB(255, 0, 0, 255),
+                        ),
+                        width: 16,
+                        height: 16,
+                      ),
+                      const SizedBox(
+                        width: 8,
+                      ),
+                      const Text(": Your selected position."),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.lightBlue.withOpacity(0.75),
+                        ),
+                        width: 16,
+                        height: 16,
+                      ),
+                      const SizedBox(
+                        width: 8,
+                      ),
+                      const Text(
+                          ": Area within a 50m radius of your selected position"),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Container(
+                        decoration: const BoxDecoration(
+                          color: Color.fromARGB(255, 255, 0, 0),
+                        ),
+                        width: 16,
+                        height: 16,
+                      ),
+                      const SizedBox(
+                        width: 8,
+                      ),
+                      const Text(": Your current position."),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Container(
+                        decoration: const BoxDecoration(
+                          color: Colors.black,
+                        ),
+                        width: 16,
+                        height: 16,
+                      ),
+                      const SizedBox(
+                        width: 8,
+                      ),
+                      const Text(": Line from current to selected position."),
+                    ],
+                  ),
+                  const SizedBox(
+                    height: 16,
+                  ),
                   SizedBox(
                     height: 300,
                     child: GoogleMap(
