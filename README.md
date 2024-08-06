@@ -1,16 +1,27 @@
-# hm_geotagging_test
+# Attendance Mobile (HashMicro Test)
 
-A new Flutter project.
+With this question prompt:
+```
+Buat 1 applikasi di flutter, untuk mobile attendance,
 
-## Getting Started
+di mana ada:
+1. Create master data lokasi, lokasinya lalu geotagging untuk dapat pin locationnya
+2. Ada data attendance, di mana user bisa create atttendance baru dengan track GPS locaation nya apakah dia di pin location nya atau tidak
 
-This project is a starting point for a Flutter application.
+jika > 50 meter dari pin lcoation, maka reject attendancenya
 
-A few resources to get you started if this is your first Flutter project:
+Mohon Mengumpulkan Hasil test dalam bentuk APK dan Source Code kemudian dikirim kembali melalui Whatsapp.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+```
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## How to run
+
+### For Android
+1. Add this to `android/local.properties`
+   
+   ```google.map.api_key=<GOOGLE-MAP-API-KEY>```
+
+   visit this link to know the details to get the google map trial api key: https://pub.dev/packages/google_maps_flutter#getting-started
+
+### For IOS
+Because lack of device to test the app, please visit this link to setup the project: https://pub.dev/packages/google_maps_flutter#ios
